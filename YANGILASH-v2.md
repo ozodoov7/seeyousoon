@@ -1,6 +1,6 @@
 # 2-versiyaga o'tish: hamma uchun shaxsiy havola (cPanel)
 
-Endi botga kim `/start` bossa, o'zining havolasini oladi (`seeyousoon.uz/madina`).
+Endi botga kim `/start` bossa, o'zining havolasini oladi (`seeyousoon.uz/username`).
 Do'stlari shu havola orqali uni uchrashuvga taklif qiladi. Ma'lumotlar **MySQL** bazasida saqlanadi.
 
 Sizning eski takliflaringiz, matnlaringiz va stikerlaringiz **avtomatik ko'chiriladi** — hech narsa yo'qolmaydi.
@@ -70,7 +70,7 @@ Eski takliflaringiz `🗓 Kelgusi` da turibdi. `data/db.json` fayli `db.json.mig
 
 **Yangi imkoniyatlar:**
 - 🔗 **Havolam** — havolangiz va "Do'stlarga yuborish" tugmasi
-- ✏️ Havola nomini o'zgartirish (masalan `madina_23`)
+- ✏️ Havola nomini o'zgartirish (masalan `ozodoov7`)
 - 🚫 **Bloklash** — taklif kartasida; bezovta qiluvchi odam boshqa taklif yubora olmaydi
 - 📋 **Takliflarim** — siz boshqalarga yuborgan takliflar
 - Spam himoyasi: bir odamga 3 tadan ortiq faol taklif yo'q, kuniga jami 10 tadan ortiq yo'q

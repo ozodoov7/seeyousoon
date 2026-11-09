@@ -204,7 +204,7 @@ async function setSlugRaw(id, slug) {
 // Foydalanuvchi o'zi tanlagan nom. Xato bo'lsa — sababini qaytaradi
 async function changeSlug(id, wanted) {
   const s = String(wanted || '').trim().toLowerCase().replace(/^@/, '').replace(/^https?:\/\/[^/]+\//, '');
-  if (!SLUG_RE.test(s)) return { error: 'Faqat lotin harflari, raqam va _ belgisi, 3–32 ta belgi bo\'lsin. Masalan: madina_23' };
+  if (!SLUG_RE.test(s)) return { error: 'Faqat lotin harflari, raqam va _ belgisi, 3–32 ta belgi bo\'lsin. Masalan: ozodoov7' };
   if (!slugOk(s)) return { error: 'Bu nomni ishlatib bo\'lmaydi, boshqasini tanlang.' };
   if (!(await slugFree(s, id))) return { error: 'Bu nom band 😔 Boshqasini tanlang.' };
   try { await setSlugRaw(id, s); } catch { return { error: 'Bu nom band 😔 Boshqasini tanlang.' }; }

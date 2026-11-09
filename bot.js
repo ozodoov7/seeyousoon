@@ -678,7 +678,7 @@ async function handleCallback(cq) {
       st.step = 'slug';
       const cur = await L.ensureSlug(me);
       return edit(chatId, mid,
-        `✏️ <b>Havola nomini o'zgartirish</b>\n\nHozir: <code>${esc(shareLink(cur))}</code>\n\n👇 Yangi nomni yozib yuboring.\nFaqat lotin harflari, raqam va <code>_</code> (3–32 belgi).\nMasalan: <code>madina_23</code>\n\n⚠️ Eski havola ishlamay qoladi.`,
+        `✏️ <b>Havola nomini o'zgartirish</b>\n\nHozir: <code>${esc(shareLink(cur))}</code>\n\n👇 Yangi nomni yozib yuboring.\nFaqat lotin harflari, raqam va <code>_</code> (3–32 belgi).\nMasalan: <code>ozodoov7</code>\n\n⚠️ Eski havola ishlamay qoladi.`,
         ik([[btn('✖️ Bekor qilish', 'home')]]));
     }
     if (a === 'bls') return show(await blockedScreen(chatId));

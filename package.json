@@ -1,0 +1,17 @@
+{
+  "name": "uchrashuv-bot",
+  "version": "1.0.0",
+  "description": "Telegram bot orqali ishlaydigan uchrashuvga yozilish sayti",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "express": "^4.21.2",
+    "mysql2": "^3.24.6",
+    "three": "^0.187.0"
+  }
+}

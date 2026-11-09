@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="theme-color" content="#1a1418">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>See you soon</title>
+  <link rel="icon" href="favicon.ico?v=5" sizes="any">
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png?v=5">
+  <link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png?v=5">
+  <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png?v=5">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png?v=5">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css?v=5">
+  <script type="importmap">{ "imports": { "three": "/vendor/three/three.module.js" } }</script>
+</head>
+<body>
+  <canvas id="bg3d" aria-hidden="true"></canvas>
+  <div class="scene">
+  <main class="card" id="card">
+    <div class="glare" aria-hidden="true"></div>
+    <header class="head">
+      <div class="avatar" id="avatar">🌸</div>
+      <div>
+        <h1 id="ownerName">&nbsp;</h1>
+        <p id="ownerTitle" class="muted">&nbsp;</p>
+      </div>
+      <!-- Davomiylik (masalan "60 daq") hozircha yashirilgan:
+
+      <span class="pill" id="duration">30 daq</span> -->
+    </header>
+
+    <!-- Bosh sahifa: o'z havolangizni oling -->
+    <section id="landing" hidden class="landing">
+      <div class="land-icon">💌</div>
+      <h2 id="landTitle">Do'stlaringiz sizni uchrashuvga taklif qilsin</h2>
+      <p class="muted" id="landText">Botga kiring va shaxsiy havolangizni oling. Uni do'stlaringizga yuboring — ular joy va vaqt tanlab, sizga taklif yuborishadi. Siz esa bitta tugma bilan qabul qilasiz 🌸</p>
+      <ol class="land-steps">
+        <li><span>1</span> Botda <b>Start</b> ni bosing</li>
+        <li><span>2</span> Havolangizni do'stlaringizga yuboring</li>
+        <li><span>3</span> Takliflar Telegramingizga keladi</li>
+      </ol>
+      <a class="btn" id="landBtn" rel="noopener">✨ Havolamni olish</a>
+    </section>
+
+    <!-- 1-qadam: sana va vaqt -->
+    <section id="step1" hidden>
+      <h2><span class="num">1</span> Kunni tanlang</h2>
+      <div class="days" id="days"></div>
+
+      <h2><span class="num">2</span> Vaqtni tanlang</h2>
+      <div class="slots" id="slots"><p class="muted">Avval kunni tanlang</p></div>
+
+      <button class="btn" id="next" disabled>Davom etish →</button>
+    </section>
+
+    <!-- 2-qadam: ma'lumotlar -->
+    <section id="step2" hidden>
+      <button class="back" id="back">← Orqaga</button>
+      <div class="chosen" id="chosen"></div>
+      <form id="form" novalidate>
+        <div class="field">Qayerda ko'rishamiz? *
+          <div class="places" id="places"></div>
+        </div>
+        <label id="otherWrap" hidden>Joy nomi *
+          <input name="placeText" maxlength="60" placeholder="Masalan: Chorvoq, Magic City">
+        </label>
+        <label>Biror so'z <span class="muted">(ixtiyoriy)</span>
+          <textarea name="note" rows="3" maxlength="500" placeholder="Qaysi filmga boramiz, qayerda kutishim kerak..."></textarea>
+        </label>
+        <input name="website" class="hp" tabindex="-1" autocomplete="off">
+        <p class="error" id="error" hidden></p>
+
+        <div class="send-ways" id="ways">
+          <div class="way" id="wayTg">
+            <button class="btn" type="button" id="sendTg">💌 Taklif yuborish</button>
+          </div>
+        </div>
+      </form>
+    </section>
+
+    <!-- 3: o'tish (faqat sahifa avtomatik ochilmasa ko'rinadi) -->
+    <section id="step3" hidden class="done">
+      <div class="coin"><div class="face front">💌</div><div class="face back">💌</div></div>
+      <h2>Deyarli tayyor!</h2>
+      <p id="donePlace" class="place-done"></p>
+      <p id="doneWhen" class="when"></p>
+      <a class="btn" id="tgLink" rel="noopener">Davom etish →</a>
+      <button class="link" id="again">← Boshqa vaqt tanlash</button>
+    </section>
+  </main>
+  </div>
+  <script type="module" src="bg3d.js?v=5"></script>
+  <script src="app.js?v=5"></script>
+</body>
+</html>

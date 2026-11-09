@@ -1,0 +1,13 @@
+---
+# cPanel → Git Version Control → "Deploy HEAD Commit" bosilganda bajariladi.
+# Kod GitHub'dan olinadi va ilova papkasiga ko'chiriladi.
+# .env (token, parollar), data/ va node_modules/ ga TEGILMAYDI — ular serverda qoladi.
+deployment:
+  tasks:
+    - export DEPLOYPATH=/home/ecobiome/invitation_project/
+    - /bin/mkdir -p $DEPLOYPATH/public $DEPLOYPATH/tmp
+    - /bin/cp -f config.js db.js lib.js bot.js server.js package.json $DEPLOYPATH
+    - /bin/cp -Rf public/. $DEPLOYPATH/public/
+    - /bin/cp -f README.md YANGILASH-v2.md DEPLOY-CPANEL.md GITHUB-CPANEL.md .env.example $DEPLOYPATH
+    # Ilovani qayta ishga tushirish (Passenger)
+    - /bin/touch $DEPLOYPATH/tmp/restart.txt

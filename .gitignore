@@ -1,0 +1,7 @@
+node_modules/
+.env
+data/
+tmp/
+*.log
+# VPS skripti (cPanel antivirusi "curl | bash" qatorini shubhali deb belgilaydi)
+deploy/

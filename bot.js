@@ -614,8 +614,9 @@ async function handleMessage(msg) {
   }
 
   // ---- Boshqa har qanday xabar — oxirgi taklif yuborilgan odamga yetkaziladi ----
+  // Bloklangan mehmonning xabari egasiga yetkazilmaydi
   const h = await lastHostOf(chatId);
-  if (h && h !== chatId) {
+  if (h && h !== chatId && !(await L.isBlocked(h, chatId))) {
     await sendToHost(h, `💬 ${whoIs({ ...from, name: fullName(from), phone: user.phone })} yozdi 👇\n<i>↩️ Javob berish uchun xabarga reply qiling</i>`, chatId);
     const f = await tg('forwardMessage', { chat_id: h, from_chat_id: chatId, message_id: msg.message_id });
     if (f.ok) await L.addRelay(h, f.result.message_id, chatId);
@@ -911,11 +912,23 @@ async function ensureUsername() {
   return botUsername;
 }
 
+// Bitta chatning yangilanishlari navbat bilan ishlanadi. Webhook rejimida Telegram ularni
+// bir vaqtda yuborishi mumkin — shunda ikkala ishlov bir xil SESS yozuvini o'chirib/ustidan yozib yuboradi.
+const chatQueues = new Map();
+function handleUpdate(u) {
+  const chatId = u.message?.chat?.id ?? u.callback_query?.message?.chat?.id;
+  if (!chatId) return processUpdate(u, chatId);
+  const run = (chatQueues.get(chatId) || Promise.resolve()).then(() => processUpdate(u, chatId));
+  const tail = run.catch(() => {});
+  chatQueues.set(chatId, tail);
+  tail.then(() => { if (chatQueues.get(chatId) === tail) chatQueues.delete(chatId); });
+  return run;
+}
+
 // Har bir yangilanish: baza tayyor → matnlar yangilanadi → suhbat holati o'qiladi → ishlanadi → holat saqlanadi
-async function handleUpdate(u) {
+async function processUpdate(u, chatId) {
   stats.updates++;
   stats.lastUpdateAt = new Date().toISOString();
-  const chatId = u.message?.chat?.id ?? u.callback_query?.message?.chat?.id;
   try {
     await L.DB.init();
     await L.loadSettings();

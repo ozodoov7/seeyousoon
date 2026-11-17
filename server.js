@@ -8,13 +8,17 @@ const bot = require('./bot');
 const { CFG } = L;
 
 const app = express();
-app.set('trust proxy', true);
+// Faqat eng yaqin proksiga (hosting serveri) ishoniladi. `true` bo'lsa, foydalanuvchi
+// X-Forwarded-For sarlavhasiga soxta IP yozib, spam cheklovini aylanib o'ta oladi.
+app.set('trust proxy', 1);
 app.use(express.json({ limit: '20kb' }));
 // HTML/JS/CSS har safar yangisi tekshirilsin — yangilanishdan keyin eski nusxa ko'rinmasin
 const noCache = (res, file) => { if (/\.(html|js|css)$/.test(file)) res.setHeader('Cache-Control', 'no-cache'); };
 app.use(express.static(path.join(__dirname, 'public'), { setHeaders: noCache, index: false }));
 // Three.js (3D animatsiyalar uchun) — CDN'siz, o'zimizdan beriladi
 app.use('/vendor/three', express.static(path.dirname(require.resolve('three')), { maxAge: '7d' }));
+// Three.js qo'shimchalari (bloom porlashi uchun postprocessing)
+app.use('/vendor/three-addons', express.static(path.join(path.dirname(require.resolve('three')), '..', 'examples', 'jsm'), { maxAge: '7d' }));
 
 // Baza tayyor bo'lishini kutish (birinchi so'rovda jadvallar yaratiladi) + admin matnlarini yangilash
 const ready = async (req, res, next) => {

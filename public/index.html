@@ -2,8 +2,8 @@
 <html lang="uz">
 <head>
   <meta charset="UTF-8">
-  <meta name="theme-color" content="#1a1418">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#140f13">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>See you soon</title>
   <link rel="icon" href="favicon.ico?v=5" sizes="any">
   <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png?v=5">
@@ -11,29 +11,49 @@
   <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png?v=5">
   <link rel="apple-touch-icon" href="apple-touch-icon.png?v=5">
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=5">
-  <script type="importmap">{ "imports": { "three": "/vendor/three/three.module.js" } }</script>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..700;1,6..96,400..700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css?v=12">
+  <script type="importmap">{ "imports": { "three": "/vendor/three/three.module.js", "three/addons/": "/vendor/three-addons/" } }</script>
 </head>
 <body>
+  <!-- Chizilgan belgilar: sakura guli va konvert (emoji o'rniga) -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+      <radialGradient id="petalFill" cx="50%" cy="85%" r="95%">
+        <stop offset="0" stop-color="#c9637f"/>
+        <stop offset=".45" stop-color="#f2b4c7"/>
+        <stop offset="1" stop-color="#fff1f5"/>
+      </radialGradient>
+      <path id="petal" d="M0 0C-3.6-1.9-4.4-6.6-1.4-8.7-.6-9.1-.1-8.6 0-7.9.1-8.6.6-9.1 1.4-8.7 4.4-6.6 3.6-1.9 0 0Z"/>
+    </defs>
+    <symbol id="blossom" viewBox="-11 -11 22 22">
+      <g fill="url(#petalFill)">
+        <use href="#petal"/><use href="#petal" transform="rotate(72)"/><use href="#petal" transform="rotate(144)"/>
+        <use href="#petal" transform="rotate(216)"/><use href="#petal" transform="rotate(288)"/>
+      </g>
+      <g stroke="#a8445f" stroke-width=".35" stroke-linecap="round">
+        <path d="M0 0v-3.4M0 0l3.2-1M0 0l2-2.8M0 0l-2 2.8M0 0l-3.2-1M0 0l-2-2.8M0 0l2 2.8M0 0l3.2 1M0 0l-3.2 1"/>
+      </g>
+      <circle r="1.3" fill="#b8506c"/>
+    </symbol>
+  </svg>
+
   <canvas id="bg3d" aria-hidden="true"></canvas>
   <div class="scene">
   <main class="card" id="card">
     <div class="glare" aria-hidden="true"></div>
     <header class="head">
-      <div class="avatar" id="avatar">🌸</div>
+      <div class="avatar" id="avatar" aria-hidden="true"><svg><use href="#blossom"/></svg></div>
       <div>
         <h1 id="ownerName">&nbsp;</h1>
         <p id="ownerTitle" class="muted">&nbsp;</p>
       </div>
-      <!-- Davomiylik (masalan "60 daq") hozircha yashirilgan:
-
-      <span class="pill" id="duration">30 daq</span> -->
     </header>
 
     <!-- Bosh sahifa: o'z havolangizni oling -->
     <section id="landing" hidden class="landing">
-      <div class="land-icon">💌</div>
+      <svg class="land-art" aria-hidden="true"><use href="#blossom"/></svg>
       <h2 id="landTitle">Do'stlaringiz sizni uchrashuvga taklif qilsin</h2>
       <p class="muted" id="landText">Botga kiring va shaxsiy havolangizni oling. Uni do'stlaringizga yuboring — ular joy va vaqt tanlab, sizga taklif yuborishadi. Siz esa bitta tugma bilan qabul qilasiz 🌸</p>
       <ol class="land-steps">
@@ -41,7 +61,23 @@
         <li><span>2</span> Havolangizni do'stlaringizga yuboring</li>
         <li><span>3</span> Takliflar Telegramingizga keladi</li>
       </ol>
-      <a class="btn" id="landBtn" rel="noopener">✨ Havolamni olish</a>
+      <a class="btn" id="landBtn" rel="noopener">Havolamni olish</a>
+    </section>
+
+    <!-- 0-qadam: savol. "Yo'q" tugmasi qochadi, oxiri faqat "Ha" qoladi -->
+    <section id="step0" hidden class="ask">
+      <svg class="ask-art" viewBox="0 0 120 96" aria-hidden="true">
+        <path pathLength="1" class="draw heart" d="M60 46C52 40 40 33 40 22.5 40 16 45 12 50.5 12 55 12 58 15 60 18.5 62 15 65 12 69.5 12 75 12 80 16 80 22.5 80 33 68 40 60 46Z"/>
+        <path pathLength="1" class="draw env" d="M14 36h92a6 6 0 0 1 6 6v42a6 6 0 0 1-6 6H14a6 6 0 0 1-6-6V42a6 6 0 0 1 6-6Z"/>
+        <path pathLength="1" class="draw env" d="M9 39l51 30 51-30"/>
+        <path pathLength="1" class="draw env thin" d="M9 87l36-24M111 87L75 63"/>
+      </svg>
+      <h2 class="ask-title" id="askTitle">Men bilan <em>uchrashuvga</em> chiqasizmi?</h2>
+      <p class="muted" id="askPlea" aria-live="polite">&nbsp;</p>
+      <div class="ask-row">
+        <button class="btn ask-yes" id="yes" type="button">Ha, albatta</button>
+        <button class="ask-no" id="no" type="button">Yo'q</button>
+      </div>
     </section>
 
     <!-- 1-qadam: sana va vaqt -->
@@ -52,18 +88,18 @@
       <h2><span class="num">2</span> Vaqtni tanlang</h2>
       <div class="slots" id="slots"><p class="muted">Avval kunni tanlang</p></div>
 
-      <button class="btn" id="next" disabled>Davom etish →</button>
+      <button class="btn" id="next" disabled>Davom etish <span class="arr" aria-hidden="true">→</span></button>
     </section>
 
     <!-- 2-qadam: ma'lumotlar -->
     <section id="step2" hidden>
-      <button class="back" id="back">← Orqaga</button>
+      <button class="back" id="back"><span aria-hidden="true">←</span> Orqaga</button>
       <div class="chosen" id="chosen"></div>
       <form id="form" novalidate>
-        <div class="field">Qayerda ko'rishamiz? *
+        <div class="field"><span class="field-label">Qayerda ko'rishamiz?</span>
           <div class="places" id="places"></div>
         </div>
-        <label id="otherWrap" hidden>Joy nomi *
+        <label id="otherWrap" hidden>Joy nomi
           <input name="placeText" maxlength="60" placeholder="Masalan: Chorvoq, Magic City">
         </label>
         <label>Biror so'z <span class="muted">(ixtiyoriy)</span>
@@ -74,7 +110,7 @@
 
         <div class="send-ways" id="ways">
           <div class="way" id="wayTg">
-            <button class="btn" type="button" id="sendTg">💌 Taklif yuborish</button>
+            <button class="btn" type="button" id="sendTg">Taklif yuborish</button>
           </div>
         </div>
       </form>
@@ -82,16 +118,20 @@
 
     <!-- 3: o'tish (faqat sahifa avtomatik ochilmasa ko'rinadi) -->
     <section id="step3" hidden class="done">
-      <div class="coin"><div class="face front">💌</div><div class="face back">💌</div></div>
+      <div class="coin">
+        <div class="face front"><svg><use href="#blossom"/></svg></div>
+        <div class="face back"><svg><use href="#blossom"/></svg></div>
+      </div>
       <h2>Deyarli tayyor!</h2>
       <p id="donePlace" class="place-done"></p>
       <p id="doneWhen" class="when"></p>
-      <a class="btn" id="tgLink" rel="noopener">Davom etish →</a>
-      <button class="link" id="again">← Boshqa vaqt tanlash</button>
+      <a class="btn" id="tgLink" rel="noopener">Davom etish <span class="arr" aria-hidden="true">→</span></a>
+      <button class="link" id="again"><span aria-hidden="true">←</span> Boshqa vaqt tanlash</button>
     </section>
   </main>
   </div>
-  <script type="module" src="bg3d.js?v=5"></script>
-  <script src="app.js?v=5"></script>
+  <script type="module" src="bg3d.js?v=12"></script>
+  <script src="fx.js?v=12"></script>
+  <script src="app.js?v=12"></script>
 </body>
 </html>

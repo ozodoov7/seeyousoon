@@ -6,8 +6,11 @@ deployment:
   tasks:
     - export DEPLOYPATH=/home/ecobiome/invitation_project/
     - /bin/mkdir -p $DEPLOYPATH/public $DEPLOYPATH/tmp
-    - /bin/cp -f config.js db.js lib.js bot.js server.js package.json $DEPLOYPATH
+    - /bin/cp -f config.js db.js lib.js bot.js server.js package.json package-lock.json $DEPLOYPATH
     - /bin/cp -Rf public/. $DEPLOYPATH/public/
     - /bin/cp -f README.md YANGILASH-v2.md DEPLOY-CPANEL.md GITHUB-CPANEL.md .env.example $DEPLOYPATH
+    # Paketlarni o'rnatish ("Run NPM Install" bilan bir xil). Node versiyasi (20/22) avtomatik topiladi.
+    # Node.js ilovasi hali yaratilmagan bo'lsa — o'tkazib yuboriladi.
+    - NODEBIN=$(ls -d /home/ecobiome/nodevenv/invitation_project/*/bin 2>/dev/null | sort -V | tail -1); if [ -x "$NODEBIN/npm" ]; then cd $DEPLOYPATH && PATH="$NODEBIN:$PATH" npm install --omit=dev --no-audit --no-fund; else echo "nodevenv topilmadi, npm install bajarilmadi"; fi
     # Ilovani qayta ishga tushirish (Passenger)
     - /bin/touch $DEPLOYPATH/tmp/restart.txt

@@ -8,7 +8,9 @@ const bot = require('./bot');
 const { CFG } = L;
 
 const app = express();
-app.set('trust proxy', true);
+// Faqat eng yaqin proksiga (hosting serveri) ishoniladi. `true` bo'lsa, foydalanuvchi
+// X-Forwarded-For sarlavhasiga soxta IP yozib, spam cheklovini aylanib o'ta oladi.
+app.set('trust proxy', 1);
 app.use(express.json({ limit: '20kb' }));
 // HTML/JS/CSS har safar yangisi tekshirilsin — yangilanishdan keyin eski nusxa ko'rinmasin
 const noCache = (res, file) => { if (/\.(html|js|css)$/.test(file)) res.setHeader('Cache-Control', 'no-cache'); };

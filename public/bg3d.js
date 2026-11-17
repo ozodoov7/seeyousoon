@@ -48,7 +48,41 @@ function init() {
 
   const scene = new THREE.Scene();
   scene.fog = new THREE.Fog(0x2a1d24, 12, 36); // pushti-binafsha tuman
-  const camera = new THREE.PerspectiveCamera(45, innerWidth / innerHeight, 0.1, 100);
+
+  // Fon gradienti sahnaning o'zida (bloom shaffof kanvasda qora fon beradi). CSS dagi fon bilan bir xil.
+  const bgCanvas = document.createElement('canvas');
+  bgCanvas.width = bgCanvas.height = 512;
+  {
+    const g = bgCanvas.getContext('2d');
+    const lin = g.createLinearGradient(0, 0, 0, 512);
+    lin.addColorStop(0, '#1a1418'); lin.addColorStop(0.35, '#271c22'); lin.addColorStop(0.7, '#120d11'); lin.addColorStop(1, '#06070b');
+    g.fillStyle = lin; g.fillRect(0, 0, 512, 512);
+    const glow = (x, y, r, c) => { const rg = g.createRadialGradient(x, y, 0, x, y, r); rg.addColorStop(0, c); rg.addColorStop(1, 'rgba(0,0,0,0)'); g.fillStyle = rg; g.fillRect(0, 0, 512, 512); };
+    glow(77, -25, 330, 'rgba(255,251,234,.16)');
+    glow(460, 50, 300, 'rgba(226,204,199,.12)');
+    glow(307, 282, 360, 'rgba(129,89,103,.32)');
+    glow(51, 512, 320, 'rgba(68,65,56,.45)');
+  }
+  const bgTex = new THREE.CanvasTexture(bgCanvas);
+  bgTex.colorSpace = THREE.SRGBColorSpace;
+  scene.background = bgTex;
+
+  // Yumshoq radial dog' teksturasi (oy uchun)
+  function glowTexture(stops) {
+    const c = document.createElement('canvas');
+    c.width = c.height = 256;
+    const g = c.getContext('2d');
+    const rg = g.createRadialGradient(128, 128, 0, 128, 128, 128);
+    stops.forEach(([o, col]) => rg.addColorStop(o, col));
+    g.fillStyle = rg; g.fillRect(0, 0, 256, 256);
+    const t = new THREE.CanvasTexture(c);
+    t.colorSpace = THREE.SRGBColorSpace;
+    return t;
+  }
+  // Oyna hali o'lchamsiz bo'lsa (masalan, Telegram ichidagi brauzer endi ochilayotganda) 0/0 = NaN bo'lib,
+  // shoxlarni qurish yiqiladi. Shunda vaqtincha 1 olinadi, haqiqiy o'lcham kelganda resize qayta quradi.
+  const aspect = () => (innerWidth > 0 && innerHeight > 0 ? innerWidth / innerHeight : 1);
+  const camera = new THREE.PerspectiveCamera(45, aspect(), 0.1, 100);
   camera.position.set(0, 0, 16);
 
   // Yorug'lik: tumanli krem nur + pushti porlash
@@ -215,7 +249,155 @@ function init() {
 
   // Qadam o'zgarganda shamol esadi
   let wind = 0;
-  window.kick3D = () => { wind = 4; };
+  window.kick3D = (w = 4) => { wind = Math.max(wind, w); };
+
+  // --- Bokeh: tun havosida miltillovchi yumshoq nur zarralari ---
+  const BN = reduce ? 24 : small ? 30 : 64;
+  const bPos = new Float32Array(BN * 3), bPhase = new Float32Array(BN), bSize = new Float32Array(BN);
+  for (let i = 0; i < BN; i++) {
+    bPos.set([rand(-15, 15), rand(-9, 9), rand(-16, 5)], i * 3);
+    bPhase[i] = rand(0, 20);
+    bSize[i] = rand(14, 42);
+  }
+  const bGeo = new THREE.BufferGeometry();
+  bGeo.setAttribute('position', new THREE.BufferAttribute(bPos, 3));
+  bGeo.setAttribute('aPhase', new THREE.BufferAttribute(bPhase, 1));
+  bGeo.setAttribute('aSize', new THREE.BufferAttribute(bSize, 1));
+  const bokehMat = new THREE.ShaderMaterial({
+    uniforms: { uTime: { value: 0 }, uPR: { value: renderer.getPixelRatio() } },
+    vertexShader: `
+      attribute float aPhase; attribute float aSize;
+      uniform float uTime; uniform float uPR;
+      varying float vA; varying float vMix;
+      void main() {
+        vec3 p = position;
+        p.y += sin(uTime * 0.22 + aPhase) * 0.45;
+        p.x += cos(uTime * 0.17 + aPhase * 1.3) * 0.35;
+        vec4 mv = modelViewMatrix * vec4(p, 1.0);
+        gl_Position = projectionMatrix * mv;
+        gl_PointSize = aSize * uPR * (10.0 / -mv.z);
+        float tw = 0.5 + 0.5 * sin(uTime * (0.5 + fract(aPhase) * 0.9) + aPhase * 7.0);
+        vA = 0.25 + 0.75 * tw * tw * tw;
+        vMix = fract(aPhase * 3.7);
+      }`,
+    fragmentShader: `
+      varying float vA; varying float vMix;
+      void main() {
+        float d = length(gl_PointCoord - 0.5);
+        float a = smoothstep(0.5, 0.0, d);
+        a *= a;
+        vec3 col = mix(vec3(1.0, 0.8, 0.87), vec3(1.0, 0.95, 0.84), vMix);
+        gl_FragColor = vec4(col, a * vA * 0.5);
+      }`,
+    transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
+  });
+  scene.add(new THREE.Points(bGeo, bokehMat));
+
+  // --- Oy: tuman ortidagi iliq nur (bloom bilan yumshoq porlaydi) ---
+  const moon = new THREE.Sprite(new THREE.SpriteMaterial({
+    map: glowTexture([[0, 'rgba(255,248,236,1)'], [0.09, 'rgba(255,240,228,.95)'], [0.13, 'rgba(255,214,226,.35)'], [0.4, 'rgba(242,180,199,.08)'], [1, 'rgba(0,0,0,0)']]),
+    transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, fog: false,
+  }));
+  scene.add(moon);
+  function placeMoon() {
+    const v = viewHalf(-24);
+    moon.position.set(-v.w * (small ? 0.35 : 0.55), v.h * 0.62, -24);
+    moon.scale.setScalar(small ? 9 : 12);
+  }
+  placeMoon();
+
+  // --- Kino chuqurligi: uzoqda va kameraga juda yaqinda xira gulbarglar (fokusdan tashqarida) ---
+  const pc = document.createElement('canvas');
+  pc.width = pc.height = 128;
+  {
+    const g = pc.getContext('2d');
+    g.filter = 'blur(5px)';
+    g.translate(64, 70);
+    const lg = g.createLinearGradient(0, 30, 0, -34);
+    lg.addColorStop(0, '#d97a99'); lg.addColorStop(0.45, '#f2b4c7'); lg.addColorStop(1, '#fde9ef');
+    g.fillStyle = lg;
+    g.beginPath();
+    g.moveTo(0, 30);
+    g.bezierCurveTo(-27, 17, -30, -18, -10, -31);
+    g.quadraticCurveTo(-4, -34, 0, -26);
+    g.quadraticCurveTo(4, -34, 10, -31);
+    g.bezierCurveTo(30, -18, 27, 17, 0, 30);
+    g.fill();
+  }
+  const petalTex = new THREE.CanvasTexture(pc);
+  petalTex.colorSpace = THREE.SRGBColorSpace;
+  const farN = small ? 12 : 22, nearN = reduce ? 0 : small ? 3 : 5, DN = farN + nearN;
+  const dPos = new Float32Array(DN * 3), dSeed = new Float32Array(DN), dSize = new Float32Array(DN);
+  for (let i = 0; i < DN; i++) {
+    const near = i >= farN;
+    dPos.set([rand(-1, 1), rand(-1, 1), near ? rand(9, 12.5) : rand(-30, -15)], i * 3);
+    dSeed[i] = Math.random();
+    dSize[i] = near ? rand(34, 60) : rand(60, 110);
+  }
+  const dGeo = new THREE.BufferGeometry();
+  dGeo.setAttribute('position', new THREE.BufferAttribute(dPos, 3));
+  dGeo.setAttribute('aSeed', new THREE.BufferAttribute(dSeed, 1));
+  dGeo.setAttribute('aSize', new THREE.BufferAttribute(dSize, 1));
+  const depthMat = new THREE.ShaderMaterial({
+    uniforms: {
+      uTime: { value: 0 }, uPR: { value: renderer.getPixelRatio() }, uMap: { value: petalTex },
+      uTan: { value: Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) }, uAspect: { value: aspect() }, uWind: { value: 0 },
+    },
+    vertexShader: `
+      attribute float aSeed; attribute float aSize;
+      uniform float uTime; uniform float uPR; uniform float uTan; uniform float uAspect; uniform float uWind;
+      varying float vRot; varying float vA;
+      void main() {
+        float near = step(0.0, position.z);
+        float h = uTan * (16.0 - position.z) * 1.2;
+        float w = h * uAspect * 1.2;
+        float speed = (0.3 + fract(aSeed * 7.13) * 0.35) * (1.0 + near * 1.4);
+        float y = mod(position.y * h - uTime * speed + h, 2.0 * h) - h;
+        float x = position.x * w + sin(uTime * 0.4 + aSeed * 6.28) * 0.6 * (1.0 + near) + uTime * 0.12 + uWind;
+        x = mod(x + w, 2.0 * w) - w;
+        vec4 mv = modelViewMatrix * vec4(x, y, position.z, 1.0);
+        gl_Position = projectionMatrix * mv;
+        gl_PointSize = aSize * uPR * (10.0 / max(-mv.z, 0.5));
+        float dir = fract(aSeed * 5.0) > 0.5 ? 1.0 : -1.0;
+        vRot = aSeed * 6.2831 + uTime * (0.25 + fract(aSeed * 3.1) * 0.5) * dir;
+        vA = mix(0.3, 0.42, near);
+      }`,
+    fragmentShader: `
+      uniform sampler2D uMap;
+      varying float vRot; varying float vA;
+      void main() {
+        vec2 uv = gl_PointCoord - 0.5;
+        float c = cos(vRot), s = sin(vRot);
+        uv = mat2(c, -s, s, c) * uv + 0.5;
+        vec4 t = texture2D(uMap, uv);
+        gl_FragColor = vec4(t.rgb, t.a * vA);
+        #include <colorspace_fragment>
+      }`,
+    transparent: true, depthWrite: false,
+  });
+  const depthLayer = new THREE.Points(dGeo, depthMat);
+  depthLayer.frustumCulled = false;
+  depthLayer.renderOrder = 2;
+  scene.add(depthLayer);
+
+  // --- Bloom: faqat kompyuterda, yarim aniqlikda. Yuklanmasa — oddiy chizish davom etadi ---
+  let composer = null;
+  if (!small && !reduce) {
+    Promise.all([
+      import('three/addons/postprocessing/EffectComposer.js'),
+      import('three/addons/postprocessing/RenderPass.js'),
+      import('three/addons/postprocessing/UnrealBloomPass.js'),
+      import('three/addons/postprocessing/OutputPass.js'),
+    ]).then(([{ EffectComposer }, { RenderPass }, { UnrealBloomPass }, { OutputPass }]) => {
+      const comp = new EffectComposer(renderer);
+      comp.setPixelRatio(Math.min(devicePixelRatio, 1.5));
+      comp.addPass(new RenderPass(scene, camera));
+      comp.addPass(new UnrealBloomPass(new THREE.Vector2(innerWidth / 2, innerHeight / 2), 0.55, 0.6, 0.72));
+      comp.addPass(new OutputPass());
+      comp.setSize(innerWidth, innerHeight);
+      composer = comp;
+    }).catch((e) => console.warn('Bloom yuklanmadi:', e.message));
+  }
 
   // --- Muvaffaqiyat: gulbarglar portlashi ---
   const burst = [];
@@ -240,8 +422,11 @@ function init() {
   let resizeT;
   function resize() {
     renderer.setSize(innerWidth, innerHeight, false);
-    camera.aspect = innerWidth / innerHeight;
+    camera.aspect = aspect();
     camera.updateProjectionMatrix();
+    depthMat.uniforms.uAspect.value = aspect();
+    if (composer) composer.setSize(innerWidth, innerHeight);
+    placeMoon();
   }
   addEventListener('resize', () => {
     resize();
@@ -258,6 +443,7 @@ function init() {
     const k = reduce ? 0.2 : 1;
     t += dt * k;
     wind *= 0.97;
+    bokehMat.uniforms.uTime.value = t;
 
     camera.position.x += (target.x * 2.2 - camera.position.x) * 0.04;
     camera.position.y += (-target.y * 1.5 - camera.position.y) * 0.04;
@@ -306,7 +492,10 @@ function init() {
       if (u.life > 3.5) { scene.remove(m); m.material.dispose(); burst.splice(i, 1); }
     }
 
-    renderer.render(scene, camera);
+    depthMat.uniforms.uTime.value = t;
+    depthMat.uniforms.uWind.value += wind * dt * 0.6;
+    if (composer) composer.render(dt);
+    else renderer.render(scene, camera);
     requestAnimationFrame(frame);
   }
   frame();

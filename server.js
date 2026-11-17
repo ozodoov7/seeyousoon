@@ -17,6 +17,8 @@ const noCache = (res, file) => { if (/\.(html|js|css)$/.test(file)) res.setHeade
 app.use(express.static(path.join(__dirname, 'public'), { setHeaders: noCache, index: false }));
 // Three.js (3D animatsiyalar uchun) — CDN'siz, o'zimizdan beriladi
 app.use('/vendor/three', express.static(path.dirname(require.resolve('three')), { maxAge: '7d' }));
+// Three.js qo'shimchalari (bloom porlashi uchun postprocessing)
+app.use('/vendor/three-addons', express.static(path.join(path.dirname(require.resolve('three')), '..', 'examples', 'jsm'), { maxAge: '7d' }));
 
 // Baza tayyor bo'lishini kutish (birinchi so'rovda jadvallar yaratiladi) + admin matnlarini yangilash
 const ready = async (req, res, next) => {
